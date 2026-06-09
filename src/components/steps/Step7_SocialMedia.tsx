@@ -16,13 +16,43 @@ export default function Step7_SocialMedia({ onNext, onFilesChange, initialValues
   initialValues?: Partial<Step7Data>
   initialFiles?: Record<string, File[]>
 }) {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<Step7Data>({
+  const { register, handleSubmit, formState: { errors } } = useForm<Step7Data>({
     resolver: zodResolver(step7Schema),
     defaultValues: initialValues,
   })
 
+  const [fileErrors, setFileErrors] = useState<Record<string, string>>({})
+
+  const onSubmit = (data: Step7Data) => {
+    let hasErrors = false
+    const newFileErrors: Record<string, string> = {}
+
+    if (!initialFiles?.smm_profilePhoto || initialFiles.smm_profilePhoto.length === 0) {
+      newFileErrors.smm_profilePhoto = 'Profile Photo is required'
+      hasErrors = true
+    }
+    if (!initialFiles?.smm_productPhotos || initialFiles.smm_productPhotos.length === 0) {
+      newFileErrors.smm_productPhotos = 'At least one product photo is required'
+      hasErrors = true
+    }
+
+    if (hasErrors) {
+      setFileErrors(newFileErrors)
+      return
+    }
+
+    onNext(data)
+  }
+
+  const interceptFiles = (fieldId: string, files: File[]) => {
+    if (fileErrors[fieldId] && files.length > 0) {
+      setFileErrors(p => ({ ...p, [fieldId]: '' }))
+    }
+    onFilesChange(fieldId, files)
+  }
+
   return (
-    <form onSubmit={handleSubmit(onNext)} className="animate-[slideInRight_0.3s_cubic-bezier(0.22,1,0.36,1)]">
+    <form onSubmit={handleSubmit(onSubmit)} className="animate-[slideInRight_0.3s_cubic-bezier(0.22,1,0.36,1)]">
       <SectionHeading icon="📱" title="Social Media Access" subtitle="Links to your active social profiles" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
@@ -70,10 +100,17 @@ export default function Step7_SocialMedia({ onNext, onFilesChange, initialValues
       </div>
 
       <div className="mt-8">
-        <h4 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Social Media Assets (Optional)</h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <DropZone fieldId="smm_profilePhoto" label="Profile Photo" accept={['image/jpeg', 'image/png']} multiple={false} badge="optional" onFilesChange={onFilesChange} initialFiles={initialFiles?.smm_profilePhoto} />
-          <DropZone fieldId="smm_coverPhoto" label="Cover Photo (Facebook/YouTube)" accept={['image/jpeg', 'image/png']} multiple={false} badge="optional" onFilesChange={onFilesChange} initialFiles={initialFiles?.smm_coverPhoto} />
+        <h4 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Social Media Assets</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <DropZone fieldId="smm_profilePhoto" label="Profile Photo" accept={['image/jpeg', 'image/png']} multiple={false} required badge="required" onFilesChange={interceptFiles} initialFiles={initialFiles?.smm_profilePhoto} error={fileErrors.smm_profilePhoto} />
+          <DropZone fieldId="smm_coverPhoto" label="Cover Photo (Facebook/YouTube)" accept={['image/jpeg', 'image/png']} multiple={false} badge="preferred" onFilesChange={interceptFiles} initialFiles={initialFiles?.smm_coverPhoto} />
+        </div>
+        
+        <DropZone fieldId="smm_productPhotos" label="Product Photos for Posts" accept={['image/jpeg', 'image/png']} multiple maxFiles={15} required badge="required" onFilesChange={interceptFiles} initialFiles={initialFiles?.smm_productPhotos} error={fileErrors.smm_productPhotos} />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <DropZone fieldId="smm_reelFootage" label="Raw Reels / Video Footage" accept={['video/mp4', 'video/quicktime']} multiple maxFiles={5} maxSizeMB={50} badge="preferred" onFilesChange={interceptFiles} initialFiles={initialFiles?.smm_reelFootage} />
+          <DropZone fieldId="smm_btsContent" label="Behind-the-Scenes Photos" accept={['image/jpeg', 'image/png']} multiple maxFiles={10} badge="preferred" onFilesChange={interceptFiles} initialFiles={initialFiles?.smm_btsContent} />
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import DropZone from '@/components/ui/DropZone'
 import SectionHeading from '@/components/ui/SectionHeading'
 
@@ -8,20 +8,48 @@ export default function Step4_Photos({ onNext, onFilesChange, initialFiles }: {
   onFilesChange: (fieldId: string, files: File[]) => void
   initialFiles?: Record<string, File[]>
 }) {
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    let hasErrors = false
+    const newErrors: Record<string, string> = {}
+
+    if (!initialFiles?.productPhotos || initialFiles.productPhotos.length === 0) {
+      newErrors.productPhotos = 'Please upload at least one product photo'
+      hasErrors = true
+    }
+    
+    if (!initialFiles?.heroImages || initialFiles.heroImages.length === 0) {
+      newErrors.heroImages = 'Please upload at least one hero image'
+      hasErrors = true
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors)
+      return
+    }
+
     onNext({})
+  }
+
+  const interceptFiles = (fieldId: string, files: File[]) => {
+    if (errors[fieldId] && files.length > 0) {
+      setErrors(p => ({ ...p, [fieldId]: '' }))
+    }
+    onFilesChange(fieldId, files)
   }
 
   return (
     <form onSubmit={handleSubmit} className="animate-[slideInRight_0.3s_cubic-bezier(0.22,1,0.36,1)]">
       <SectionHeading icon="📸" title="Photos & Media" subtitle="High-quality images for your website" />
 
-      <DropZone fieldId="productPhotos" label="Product Photos" accept={['image/jpeg', 'image/png', 'image/webp']} multiple maxFiles={50} badge="preferred" onFilesChange={onFilesChange} hint="Upload individual product images (max 50)" initialFiles={initialFiles?.productPhotos} />
+      <DropZone fieldId="productPhotos" label="Product Photos" accept={['image/jpeg', 'image/png', 'image/webp']} multiple maxFiles={50} required badge="required" onFilesChange={interceptFiles} hint="Upload individual product images (max 50)" initialFiles={initialFiles?.productPhotos} error={errors.productPhotos} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DropZone fieldId="heroImages" label="Hero / Banner Images" accept={['image/jpeg', 'image/png', 'image/webp']} multiple maxFiles={5} badge="preferred" onFilesChange={onFilesChange} hint="Wide, high-res images for the top of pages" initialFiles={initialFiles?.heroImages} />
-        <DropZone fieldId="storePhotos" label="Physical Store / Office" accept={['image/jpeg', 'image/png', 'image/webp']} multiple maxFiles={5} badge="optional" onFilesChange={onFilesChange} hint="Exterior and interior shots of your location" initialFiles={initialFiles?.storePhotos} />
+        <DropZone fieldId="heroImages" label="Hero / Banner Images" accept={['image/jpeg', 'image/png', 'image/webp']} multiple maxFiles={5} required badge="required" onFilesChange={interceptFiles} hint="Wide, high-res images for the top of pages" initialFiles={initialFiles?.heroImages} error={errors.heroImages} />
+        <DropZone fieldId="storePhotos" label="Physical Store / Office" accept={['image/jpeg', 'image/png', 'image/webp']} multiple maxFiles={5} badge="optional" onFilesChange={interceptFiles} hint="Exterior and interior shots of your location" initialFiles={initialFiles?.storePhotos} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
