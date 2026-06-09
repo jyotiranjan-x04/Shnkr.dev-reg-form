@@ -60,6 +60,15 @@ export default function Step7_SocialMedia({ onNext, onFilesChange, initialValues
         <textarea placeholder="Paste other links here..." {...register('otherSocialLinks')} rows={2} />
       </FieldWrapper>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 mt-6">
+        <FieldWrapper id="socialMediaLoginId" label="Social Media Login ID" required error={errors.socialMediaLoginId?.message} hint="Email or username for Facebook/Instagram">
+          <input placeholder="e.g. hello@yourbrand.com" {...register('socialMediaLoginId')} />
+        </FieldWrapper>
+        <FieldWrapper id="socialMediaPassword" label="Social Media Password" required error={errors.socialMediaPassword?.message} hint="Password for the provided Login ID">
+          <input type="password" placeholder="Your password" {...register('socialMediaPassword')} />
+        </FieldWrapper>
+      </div>
+
       <div className="mt-8">
         <h4 className="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Social Media Assets (Optional)</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

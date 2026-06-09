@@ -71,6 +71,8 @@ export const step7Schema = z.object({
   otaNumber: z.string().min(10, 'OTP phone number must be at least 10 digits'),
   youtubeChannel: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
   otherSocialLinks: z.string().optional(),
+  socialMediaLoginId: z.string().min(2, 'Social Media Login ID is required'),
+  socialMediaPassword: z.string().min(2, 'Social Media Password is required'),
 })
 
 export const step8Schema = z.object({
